@@ -5,7 +5,7 @@ const API_BASE = 'https://direct-heating.duckdns.org/api';
 
 export default function Dashboard({ fetcher }: { fetcher: any }) {
   const [stats, setStats] = useState({ quotes: 0, bookings: 0 });
-  
+
   useEffect(() => {
     fetcher(`${API_BASE}/admin/quotes`).then((res: any) => res.json()).then((data: any) => setStats((s: any) => ({ ...s, quotes: data.length })));
     fetcher(`${API_BASE}/admin/bookings`).then((res: any) => res.json()).then((data: any) => setStats((s: any) => ({ ...s, bookings: data.length })));
@@ -37,7 +37,7 @@ export default function Dashboard({ fetcher }: { fetcher: any }) {
           <p style={{ color: 'var(--text-gray)', fontSize: '0.85rem', marginTop: '1rem' }}>Confirmed and pending services</p>
         </div>
       </div>
-      
+
       <div className="card" style={{ marginTop: '2rem', padding: '2rem' }}>
         <h3 style={{ marginBottom: '1rem' }}>Recent Activity</h3>
         <p style={{ color: 'var(--text-gray)' }}>No recent activity to show.</p>

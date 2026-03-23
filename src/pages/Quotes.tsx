@@ -5,7 +5,7 @@ const API_BASE = 'https://direct-heating.duckdns.org/api';
 
 export default function Quotes({ fetcher }: { fetcher: any }) {
   const [quotes, setQuotes] = useState([]);
-  
+
   useEffect(() => {
     fetcher(`${API_BASE}/admin/quotes`).then((res: any) => res.json()).then(setQuotes);
   }, []);
@@ -17,9 +17,9 @@ export default function Quotes({ fetcher }: { fetcher: any }) {
         <table>
           <thead>
             <tr>
-              <th><div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><User size={14}/> Customer</div></th>
-              <th><div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Briefcase size={14}/> Service</div></th>
-              <th><div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Calendar size={14}/> Date</div></th>
+              <th><div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><User size={14} /> Customer</div></th>
+              <th><div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Briefcase size={14} /> Service</div></th>
+              <th><div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Calendar size={14} /> Date</div></th>
               <th>Status</th>
             </tr>
           </thead>

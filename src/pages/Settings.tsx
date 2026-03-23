@@ -39,18 +39,18 @@ export default function Settings({ fetcher }: { fetcher: any }) {
         <form onSubmit={handleSubmit}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
             <div className="form-group">
-              <label><div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Clock size={14}/> Opening Time</div></label>
-              <input type="time" value={settings.openingTime} onChange={e => setSettings({...settings, openingTime: e.target.value})} />
+              <label><div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Clock size={14} /> Opening Time</div></label>
+              <input type="time" value={settings.openingTime} onChange={e => setSettings({ ...settings, openingTime: e.target.value })} />
             </div>
             <div className="form-group">
-              <label><div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Clock size={14}/> Closing Time</div></label>
-              <input type="time" value={settings.closingTime} onChange={e => setSettings({...settings, closingTime: e.target.value})} />
+              <label><div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Clock size={14} /> Closing Time</div></label>
+              <input type="time" value={settings.closingTime} onChange={e => setSettings({ ...settings, closingTime: e.target.value })} />
             </div>
           </div>
 
           <div className="form-group">
-            <label><div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Hourglass size={14}/> Slot Duration</div></label>
-            <select value={settings.slotDuration} onChange={e => setSettings({...settings, slotDuration: parseInt(e.target.value)})}>
+            <label><div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Hourglass size={14} /> Slot Duration</div></label>
+            <select value={settings.slotDuration} onChange={e => setSettings({ ...settings, slotDuration: parseInt(e.target.value) })}>
               <option value="30">30 Minutes (Fast Service)</option>
               <option value="60">1 Hour (Standard Service)</option>
               <option value="90">1.5 Hours (Deep Service)</option>

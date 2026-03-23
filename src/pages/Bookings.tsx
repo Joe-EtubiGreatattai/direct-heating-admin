@@ -32,7 +32,7 @@ export default function Bookings({ fetcher }: { fetcher: any }) {
       method: 'PUT',
       body: JSON.stringify({ status: updatingStatus, adminNote })
     });
-    
+
     setIsModalOpen(false);
     setUpdatingId(null);
     setUpdatingStatus(null);
@@ -46,9 +46,9 @@ export default function Bookings({ fetcher }: { fetcher: any }) {
         <table>
           <thead>
             <tr>
-              <th><div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><User size={14}/> Customer</div></th>
-              <th><div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Calendar size={14}/> Date</div></th>
-              <th><div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Clock size={14}/> Time</div></th>
+              <th><div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><User size={14} /> Customer</div></th>
+              <th><div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Calendar size={14} /> Date</div></th>
+              <th><div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Clock size={14} /> Time</div></th>
               <th>Status</th>
               <th style={{ textAlign: 'right', paddingRight: '2rem' }}>Actions</th>
             </tr>
@@ -99,24 +99,24 @@ export default function Bookings({ fetcher }: { fetcher: any }) {
         }}>
           <div className="card" style={{ width: '90%', maxWidth: '500px', padding: '2.5rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
-              <div style={{ 
-                background: updatingStatus === 'accepted' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)', 
-                padding: '0.8rem', 
-                borderRadius: '12px', 
-                color: updatingStatus === 'accepted' ? 'var(--success)' : 'var(--danger)' 
+              <div style={{
+                background: updatingStatus === 'accepted' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                padding: '0.8rem',
+                borderRadius: '12px',
+                color: updatingStatus === 'accepted' ? 'var(--success)' : 'var(--danger)'
               }}>
                 <MessageSquare size={24} />
               </div>
               <h3 style={{ margin: 0 }}>{updatingStatus === 'accepted' ? 'Accept Booking' : 'Reject Booking'}</h3>
             </div>
-            
+
             <p style={{ color: 'var(--text-gray)', marginBottom: '1.5rem', fontSize: '0.95rem' }}>
               Add an optional message for the customer. They will receive this via email.
             </p>
 
             <div className="form-group">
               <label>Message to Customer</label>
-              <textarea 
+              <textarea
                 value={adminNote}
                 onChange={(e) => setAdminNote(e.target.value)}
                 placeholder="e.g. We look forward to seeing you!"
@@ -128,9 +128,9 @@ export default function Bookings({ fetcher }: { fetcher: any }) {
               <button onClick={() => setIsModalOpen(false)} className="btn" style={{ flex: 1, background: 'rgba(255,255,255,0.05)', color: 'white' }}>
                 Cancel
               </button>
-              <button 
-                onClick={confirmUpdate} 
-                className="btn btn-primary" 
+              <button
+                onClick={confirmUpdate}
+                className="btn btn-primary"
                 style={{ flex: 1, background: updatingStatus === 'accepted' ? 'var(--success)' : 'var(--danger)', color: 'white' }}
               >
                 Confirm {updatingStatus === 'accepted' ? 'Accept' : 'Reject'} <Send size={16} />

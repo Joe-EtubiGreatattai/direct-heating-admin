@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Plus, Trash2, Edit2, Check, X, ChevronUp, ChevronDown } from 'lucide-react';
 
 const API = 'https://direct-heating.duckdns.org/api';
@@ -25,16 +25,16 @@ export default function FAQsManager({ fetcher }: Props) {
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => { loadItems(); }, []);
-
-  async function loadItems() {
+  const loadItems = useCallback(async () => {
     try {
       const res = await fetcher(`${API}/admin/cms/faqs`);
       setItems(await res.json());
     } finally {
       setLoading(false);
     }
-  }
+  }, [fetcher]);
+
+  useEffect(() => { void loadItems(); }, [loadItems]);
 
   function openAdd() {
     setEditing(null);
@@ -105,10 +105,10 @@ export default function FAQsManager({ fetcher }: Props) {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-        <div>
-          <h1 style={{ marginBottom: '0.5rem' }}>FAQs</h1>
-          <p style={{ color: 'var(--text-gray)', fontSize: '0.95rem' }}>{items.filter(i => i.active).length} active · {items.length} total</p>
+      <div className="page-header">
+        <div className="page-header-meta">
+          <h1>FAQs</h1>
+          <p>{items.filter(i => i.active).length} active · {items.length} total</p>
         </div>
         <button className="btn btn-primary" onClick={openAdd}><Plus size={16} /> Add FAQ</button>
       </div>
@@ -116,7 +116,7 @@ export default function FAQsManager({ fetcher }: Props) {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
         {sorted.map((item, idx) => (
           <div key={item._id} className="card" style={{ opacity: item.active ? 1 : 0.5 }}>
-            <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
+            <div className="item-row">
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', flexShrink: 0 }}>
                 <button style={{ background: 'none', border: '1px solid var(--card-border)', color: 'var(--text-gray)', borderRadius: '6px', cursor: 'pointer', padding: '2px 4px' }} onClick={() => handleMove(item, -1)} disabled={idx === 0}><ChevronUp size={14} /></button>
                 <button style={{ background: 'none', border: '1px solid var(--card-border)', color: 'var(--text-gray)', borderRadius: '6px', cursor: 'pointer', padding: '2px 4px' }} onClick={() => handleMove(item, 1)} disabled={idx === sorted.length - 1}><ChevronDown size={14} /></button>
@@ -128,7 +128,7 @@ export default function FAQsManager({ fetcher }: Props) {
                 </div>
                 <p style={{ color: 'var(--text-gray)', fontSize: '0.88rem', lineHeight: 1.6 }}>{item.answer}</p>
               </div>
-              <div style={{ display: 'flex', gap: '0.5rem', flexShrink: 0 }}>
+              <div className="item-actions">
                 <button className="btn" style={{ padding: '0.5rem', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--card-border)', color: 'var(--text-main)' }} onClick={() => openEdit(item)}><Edit2 size={15} /></button>
                 <button className="btn" style={{ padding: '0.5rem', background: item.active ? 'rgba(245,158,11,0.1)' : 'rgba(16,185,129,0.1)', border: `1px solid ${item.active ? 'var(--warning)' : 'var(--success)'}`, color: item.active ? 'var(--warning)' : 'var(--success)' }} onClick={() => handleToggle(item)}>{item.active ? <X size={15} /> : <Check size={15} />}</button>
                 <button className="btn" style={{ padding: '0.5rem', background: 'rgba(239,68,68,0.1)', border: '1px solid var(--danger)', color: 'var(--danger)' }} onClick={() => handleDelete(item._id)}><Trash2 size={15} /></button>
@@ -139,8 +139,8 @@ export default function FAQsManager({ fetcher }: Props) {
       </div>
 
       {showModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-          <div className="card" style={{ width: '580px', maxWidth: '90vw', maxHeight: '90vh', overflowY: 'auto' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem', overflowY: 'auto' }}>
+          <div className="card" style={{ width: '580px', maxWidth: '100%', maxHeight: '90vh', overflowY: 'auto' }}>
             <h2 style={{ marginBottom: '1.5rem' }}>{editing ? 'Edit FAQ' : 'Add FAQ'}</h2>
             <div className="form-group">
               <label>Question</label>

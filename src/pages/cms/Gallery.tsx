@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Trash2, Edit2, Upload, Check, X, Image } from 'lucide-react';
 
 const API = 'https://direct-heating.duckdns.org/api';
@@ -28,9 +28,7 @@ export default function GalleryManager({ fetcher }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
-  useEffect(() => { loadItems(); }, []);
-
-  async function loadItems() {
+  const loadItems = useCallback(async () => {
     try {
       const res = await fetcher(`${API}/admin/cms/gallery`);
       const data = await res.json();
@@ -38,7 +36,9 @@ export default function GalleryManager({ fetcher }: Props) {
     } finally {
       setLoading(false);
     }
-  }
+  }, [fetcher]);
+
+  useEffect(() => { void loadItems(); }, [loadItems]);
 
   async function handleDelete(id: string) {
     if (!confirm('Delete this image?')) return;
@@ -111,10 +111,10 @@ export default function GalleryManager({ fetcher }: Props) {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-        <div>
-          <h1 style={{ marginBottom: '0.5rem' }}>Gallery</h1>
-          <p style={{ color: 'var(--text-gray)', fontSize: '0.95rem' }}>{items.length} images · Toggle visibility or edit captions</p>
+      <div className="page-header">
+        <div className="page-header-meta">
+          <h1>Gallery</h1>
+          <p>{items.length} images · Toggle visibility or edit captions</p>
         </div>
         <button className="btn btn-primary" onClick={() => setShowUploadModal(true)}>
           <Upload size={16} /> Upload Image
@@ -140,7 +140,7 @@ export default function GalleryManager({ fetcher }: Props) {
             <div style={{ padding: '1rem' }}>
               <p style={{ fontSize: '0.8rem', color: 'var(--text-gray)', marginBottom: '0.3rem' }}>{item.alt}</p>
               <p style={{ fontSize: '0.9rem', lineHeight: 1.4, marginBottom: '1rem' }}>{item.caption || <em style={{ color: 'var(--text-gray)' }}>No caption</em>}</p>
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                 <button className="btn" style={{ flex: 1, fontSize: '0.8rem', padding: '0.5rem', background: 'rgba(255,255,255,0.05)', color: 'var(--text-main)', border: '1px solid var(--card-border)' }} onClick={() => setEditingItem({ ...item })}>
                   <Edit2 size={14} /> Edit
                 </button>
@@ -158,8 +158,8 @@ export default function GalleryManager({ fetcher }: Props) {
 
       {/* Edit Modal */}
       {editingItem && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-          <div className="card" style={{ width: '500px', maxWidth: '90vw' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem', overflowY: 'auto' }}>
+          <div className="card" style={{ width: '500px', maxWidth: '100%' }}>
             <h2 style={{ marginBottom: '1.5rem' }}>Edit Image</h2>
             <img src={editingItem.src} alt="" style={{ width: '100%', height: '180px', objectFit: 'cover', borderRadius: '12px', marginBottom: '1.5rem' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
             <div className="form-group">
@@ -180,8 +180,8 @@ export default function GalleryManager({ fetcher }: Props) {
 
       {/* Upload Modal */}
       {showUploadModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-          <div className="card" style={{ width: '500px', maxWidth: '90vw' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem', overflowY: 'auto' }}>
+          <div className="card" style={{ width: '500px', maxWidth: '100%' }}>
             <h2 style={{ marginBottom: '1.5rem' }}>Upload New Image</h2>
 
             <div

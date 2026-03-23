@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Save, Upload } from 'lucide-react';
 
 const API = 'https://direct-heating.duckdns.org/api';
@@ -41,9 +41,7 @@ export default function HeroContentManager({ fetcher }: Props) {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => { loadHero(); }, []);
-
-  async function loadHero() {
+  const loadHero = useCallback(async () => {
     try {
       const res = await fetcher(`${API}/admin/cms/hero`);
       const data = await res.json();
@@ -51,7 +49,9 @@ export default function HeroContentManager({ fetcher }: Props) {
     } finally {
       setLoading(false);
     }
-  }
+  }, [fetcher]);
+
+  useEffect(() => { void loadHero(); }, [loadHero]);
 
   async function handleSave() {
     setSaving(true);
@@ -117,17 +117,17 @@ export default function HeroContentManager({ fetcher }: Props) {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-        <div>
-          <h1 style={{ marginBottom: '0.5rem' }}>Hero Section</h1>
-          <p style={{ color: 'var(--text-gray)', fontSize: '0.95rem' }}>Edit the homepage hero banner content and image</p>
+      <div className="page-header">
+        <div className="page-header-meta">
+          <h1>Hero Section</h1>
+          <p>Edit the homepage hero banner content and image</p>
         </div>
         <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
           <Save size={16} /> {saving ? 'Saving...' : saved ? 'Saved!' : 'Save Changes'}
         </button>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+      <div className="content-grid-2">
 
         {/* Hero Image Upload */}
         <div className="card" style={{ gridColumn: '1 / -1' }}>
@@ -137,7 +137,7 @@ export default function HeroContentManager({ fetcher }: Props) {
             {/* Preview box */}
             <div
               style={{
-                width: '320px',
+                width: 'min(320px, 100%)',
                 height: '220px',
                 borderRadius: '16px',
                 overflow: 'hidden',

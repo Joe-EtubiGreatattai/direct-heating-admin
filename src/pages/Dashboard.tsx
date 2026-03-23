@@ -3,18 +3,46 @@ import { MessageSquare, Calendar } from 'lucide-react';
 
 const API_BASE = 'https://direct-heating.duckdns.org/api';
 
-export default function Dashboard({ fetcher }: { fetcher: any }) {
+type Fetcher = (url: string, options?: RequestInit) => Promise<Response>;
+
+interface Props {
+  fetcher: Fetcher;
+}
+
+export default function Dashboard({ fetcher }: Props) {
   const [stats, setStats] = useState({ quotes: 0, bookings: 0 });
 
   useEffect(() => {
-    fetcher(`${API_BASE}/admin/quotes`).then((res: any) => res.json()).then((data: any) => setStats((s: any) => ({ ...s, quotes: data.length })));
-    fetcher(`${API_BASE}/admin/bookings`).then((res: any) => res.json()).then((data: any) => setStats((s: any) => ({ ...s, bookings: data.length })));
-  }, []);
+    let cancelled = false;
+
+    async function load() {
+      const [quotesRes, bookingsRes] = await Promise.all([
+        fetcher(`${API_BASE}/admin/quotes`),
+        fetcher(`${API_BASE}/admin/bookings`)
+      ]);
+
+      const quotesJson = (await quotesRes.json()) as unknown;
+      const bookingsJson = (await bookingsRes.json()) as unknown;
+
+      if (cancelled) return;
+
+      setStats({
+        quotes: Array.isArray(quotesJson) ? quotesJson.length : 0,
+        bookings: Array.isArray(bookingsJson) ? bookingsJson.length : 0
+      });
+    }
+
+    void load();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [fetcher]);
 
   return (
     <div style={{ animation: 'fadeIn 0.6s ease-out' }}>
       <h1>Dashboard Overview</h1>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginTop: '1rem' }}>
+      <div className="dashboard-stats">
         <div className="card stat-card">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
             <span style={{ color: 'var(--text-gray)', fontWeight: 600 }}>Total Quotes</span>

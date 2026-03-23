@@ -3,20 +3,50 @@ import { Check, X, Calendar, User, Clock, MessageSquare, Send } from 'lucide-rea
 
 const API_BASE = 'https://direct-heating.duckdns.org/api';
 
-export default function Bookings({ fetcher }: { fetcher: any }) {
-  const [bookings, setBookings] = useState([]);
+type Fetcher = (url: string, options?: RequestInit) => Promise<Response>;
+
+interface Booking {
+  _id: string;
+  fullName: string;
+  email: string;
+  date: string;
+  timeSlot: string;
+  status: string;
+}
+
+interface Props {
+  fetcher: Fetcher;
+}
+
+export default function Bookings({ fetcher }: Props) {
+  const [bookings, setBookings] = useState<Booking[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [adminNote, setAdminNote] = useState('');
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchBookings();
-  }, []);
-
-  const fetchBookings = () => {
-    fetcher(`${API_BASE}/admin/bookings`).then((res: any) => res.json()).then(setBookings);
+  const fetchBookings = async () => {
+    const res = await fetcher(`${API_BASE}/admin/bookings`);
+    const json = (await res.json()) as unknown;
+    setBookings(Array.isArray(json) ? (json as Booking[]) : []);
   };
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function load() {
+      const res = await fetcher(`${API_BASE}/admin/bookings`);
+      const json = (await res.json()) as unknown;
+      if (cancelled) return;
+      setBookings(Array.isArray(json) ? (json as Booking[]) : []);
+    }
+
+    void load();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [fetcher]);
 
   const handleOpenModal = (id: string, status: string) => {
     setUpdatingId(id);
@@ -36,14 +66,14 @@ export default function Bookings({ fetcher }: { fetcher: any }) {
     setIsModalOpen(false);
     setUpdatingId(null);
     setUpdatingStatus(null);
-    fetchBookings();
+    void fetchBookings();
   };
 
   return (
     <div style={{ animation: 'fadeIn 0.6s ease-out', position: 'relative' }}>
       <h1>Booking Management</h1>
-      <div className="card" style={{ padding: '0' }}>
-        <table>
+      <div className="card table-card">
+        <table style={{ minWidth: '860px' }}>
           <thead>
             <tr>
               <th><div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><User size={14} /> Customer</div></th>
@@ -54,7 +84,7 @@ export default function Bookings({ fetcher }: { fetcher: any }) {
             </tr>
           </thead>
           <tbody>
-            {bookings.map((b: any) => (
+            {bookings.map(b => (
               <tr key={b._id}>
                 <td>
                   <div style={{ fontWeight: 600 }}>{b.fullName}</div>
@@ -95,9 +125,11 @@ export default function Bookings({ fetcher }: { fetcher: any }) {
           alignItems: 'center',
           justifyContent: 'center',
           zIndex: 1000,
-          animation: 'fadeIn 0.3s ease-out'
+          animation: 'fadeIn 0.3s ease-out',
+          padding: '1rem',
+          overflowY: 'auto'
         }}>
-          <div className="card" style={{ width: '90%', maxWidth: '500px', padding: '2.5rem' }}>
+          <div className="card" style={{ width: '100%', maxWidth: '500px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
               <div style={{
                 background: updatingStatus === 'accepted' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',

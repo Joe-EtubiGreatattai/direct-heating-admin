@@ -3,18 +3,48 @@ import { User, Mail, Briefcase, Calendar } from 'lucide-react';
 
 const API_BASE = 'https://direct-heating.duckdns.org/api';
 
-export default function Quotes({ fetcher }: { fetcher: any }) {
-  const [quotes, setQuotes] = useState([]);
+type Fetcher = (url: string, options?: RequestInit) => Promise<Response>;
+
+interface Quote {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  service: string;
+  customerType: string;
+  createdAt: string;
+  status: string;
+}
+
+interface Props {
+  fetcher: Fetcher;
+}
+
+export default function Quotes({ fetcher }: Props) {
+  const [quotes, setQuotes] = useState<Quote[]>([]);
 
   useEffect(() => {
-    fetcher(`${API_BASE}/admin/quotes`).then((res: any) => res.json()).then(setQuotes);
-  }, []);
+    let cancelled = false;
+
+    async function load() {
+      const res = await fetcher(`${API_BASE}/admin/quotes`);
+      const json = (await res.json()) as unknown;
+      if (cancelled) return;
+      setQuotes(Array.isArray(json) ? (json as Quote[]) : []);
+    }
+
+    void load();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [fetcher]);
 
   return (
     <div style={{ animation: 'fadeIn 0.6s ease-out' }}>
       <h1>Quote Inquiries</h1>
-      <div className="card" style={{ padding: '0' }}>
-        <table>
+      <div className="card table-card">
+        <table style={{ minWidth: '720px' }}>
           <thead>
             <tr>
               <th><div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><User size={14} /> Customer</div></th>
@@ -24,7 +54,7 @@ export default function Quotes({ fetcher }: { fetcher: any }) {
             </tr>
           </thead>
           <tbody>
-            {quotes.map((q: any) => (
+            {quotes.map(q => (
               <tr key={q._id}>
                 <td>
                   <div style={{ fontWeight: 600 }}>{q.firstName} {q.lastName}</div>

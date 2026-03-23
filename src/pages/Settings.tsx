@@ -3,13 +3,38 @@ import { Settings as SettingsIcon, Clock, Hourglass } from 'lucide-react';
 
 const API_BASE = 'https://direct-heating.duckdns.org/api';
 
-export default function Settings({ fetcher }: { fetcher: any }) {
-  const [settings, setSettings] = useState({ openingTime: '08:00', closingTime: '18:00', slotDuration: 60 });
+type Fetcher = (url: string, options?: RequestInit) => Promise<Response>;
+
+interface BookingSettings {
+  openingTime: string;
+  closingTime: string;
+  slotDuration: number;
+}
+
+interface Props {
+  fetcher: Fetcher;
+}
+
+export default function Settings({ fetcher }: Props) {
+  const [settings, setSettings] = useState<BookingSettings>({ openingTime: '08:00', closingTime: '18:00', slotDuration: 60 });
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    fetcher(`${API_BASE}/admin/settings`).then((res: any) => res.json()).then(setSettings);
-  }, []);
+    let cancelled = false;
+
+    async function load() {
+      const res = await fetcher(`${API_BASE}/admin/settings`);
+      const json = (await res.json()) as unknown;
+      if (cancelled) return;
+      if (json && typeof json === 'object') setSettings(json as BookingSettings);
+    }
+
+    void load();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [fetcher]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,7 +62,7 @@ export default function Settings({ fetcher }: { fetcher: any }) {
         </div>
 
         <form onSubmit={handleSubmit}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+          <div className="form-grid-2" style={{ gap: '1.5rem' }}>
             <div className="form-group">
               <label><div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Clock size={14} /> Opening Time</div></label>
               <input type="time" value={settings.openingTime} onChange={e => setSettings({ ...settings, openingTime: e.target.value })} />

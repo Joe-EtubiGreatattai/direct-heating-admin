@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Plus, Trash2, Edit2, Check, X } from 'lucide-react';
 
 const API = 'https://direct-heating.duckdns.org/api';
@@ -30,16 +30,16 @@ export default function ServicesManager({ fetcher }: Props) {
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => { loadItems(); }, []);
-
-  async function loadItems() {
+  const loadItems = useCallback(async () => {
     try {
       const res = await fetcher(`${API}/admin/cms/services`);
       setItems(await res.json());
     } finally {
       setLoading(false);
     }
-  }
+  }, [fetcher]);
+
+  useEffect(() => { void loadItems(); }, [loadItems]);
 
   function openAdd() {
     setEditing(null);
@@ -87,10 +87,10 @@ export default function ServicesManager({ fetcher }: Props) {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-        <div>
-          <h1 style={{ marginBottom: '0.5rem' }}>Services</h1>
-          <p style={{ color: 'var(--text-gray)', fontSize: '0.95rem' }}>{items.filter(i => i.active).length} active · {items.length} total</p>
+      <div className="page-header">
+        <div className="page-header-meta">
+          <h1>Services</h1>
+          <p>{items.filter(i => i.active).length} active · {items.length} total</p>
         </div>
         <button className="btn btn-primary" onClick={openAdd}><Plus size={16} /> Add Service</button>
       </div>
@@ -98,7 +98,7 @@ export default function ServicesManager({ fetcher }: Props) {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         {items.map(item => (
           <div key={item._id} className="card" style={{ opacity: item.active ? 1 : 0.5 }}>
-            <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'flex-start' }}>
+            <div className="item-row">
               <div style={{ flex: 1 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.4rem', flexWrap: 'wrap' }}>
                   <strong style={{ fontSize: '1.05rem' }}>{item.title}</strong>
@@ -112,7 +112,7 @@ export default function ServicesManager({ fetcher }: Props) {
                   {item.isExternal && <span style={{ color: 'var(--accent)' }}>External link</span>}
                 </div>
               </div>
-              <div style={{ display: 'flex', gap: '0.5rem', flexShrink: 0 }}>
+              <div className="item-actions">
                 <button className="btn" style={{ padding: '0.5rem', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--card-border)', color: 'var(--text-main)' }} onClick={() => openEdit(item)} title="Edit"><Edit2 size={15} /></button>
                 <button className="btn" style={{ padding: '0.5rem', background: item.active ? 'rgba(245,158,11,0.1)' : 'rgba(16,185,129,0.1)', border: `1px solid ${item.active ? 'var(--warning)' : 'var(--success)'}`, color: item.active ? 'var(--warning)' : 'var(--success)' }} onClick={() => handleToggle(item)} title={item.active ? 'Hide' : 'Show'}>{item.active ? <X size={15} /> : <Check size={15} />}</button>
                 <button className="btn" style={{ padding: '0.5rem', background: 'rgba(239,68,68,0.1)', border: '1px solid var(--danger)', color: 'var(--danger)' }} onClick={() => handleDelete(item._id)} title="Delete"><Trash2 size={15} /></button>
@@ -123,8 +123,8 @@ export default function ServicesManager({ fetcher }: Props) {
       </div>
 
       {showModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-          <div className="card" style={{ width: '580px', maxWidth: '90vw', maxHeight: '90vh', overflowY: 'auto' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem', overflowY: 'auto' }}>
+          <div className="card" style={{ width: '580px', maxWidth: '100%', maxHeight: '90vh', overflowY: 'auto' }}>
             <h2 style={{ marginBottom: '1.5rem' }}>{editing ? 'Edit Service' : 'Add Service'}</h2>
 
             <div className="form-group">
@@ -136,7 +136,7 @@ export default function ServicesManager({ fetcher }: Props) {
               <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Describe this service..." rows={3} style={{ resize: 'vertical' }} />
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            <div className="form-grid-2">
               <div className="form-group" style={{ marginBottom: 0 }}>
                 <label>CTA Button Text</label>
                 <input value={form.cta} onChange={e => setForm(f => ({ ...f, cta: e.target.value }))} placeholder="e.g. Get Quote" />

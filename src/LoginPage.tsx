@@ -29,7 +29,7 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
       } else {
         setError(data.error || 'Invalid credentials');
       }
-    } catch (err) {
+    } catch {
       setError('Connection to server failed');
     } finally {
       setLoading(false);

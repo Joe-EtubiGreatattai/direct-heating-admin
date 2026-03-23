@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Plus, Trash2, Edit2, Check, X, Star } from 'lucide-react';
 
 const API = 'https://direct-heating.duckdns.org/api';
@@ -42,16 +42,16 @@ export default function PricingManager({ fetcher }: Props) {
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => { loadPlans(); }, []);
-
-  async function loadPlans() {
+  const loadPlans = useCallback(async () => {
     try {
       const res = await fetcher(`${API}/admin/cms/pricing`);
       setPlans(await res.json());
     } finally {
       setLoading(false);
     }
-  }
+  }, [fetcher]);
+
+  useEffect(() => { void loadPlans(); }, [loadPlans]);
 
   function openAdd() {
     setEditing(null);
@@ -127,18 +127,16 @@ export default function PricingManager({ fetcher }: Props) {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-        <div>
-          <h1 style={{ marginBottom: '0.5rem' }}>Pricing</h1>
-          <p style={{ color: 'var(--text-gray)', fontSize: '0.95rem' }}>
-            {domestic.length} domestic · {commercial.length} commercial plans
-          </p>
+      <div className="page-header">
+        <div className="page-header-meta">
+          <h1>Pricing</h1>
+          <p>{domestic.length} domestic · {commercial.length} commercial plans</p>
         </div>
         <button className="btn btn-primary" onClick={openAdd}><Plus size={16} /> Add Plan</button>
       </div>
 
       {/* Tab switcher */}
-      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>
+      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
         {(['domestic', 'commercial'] as const).map(tab => (
           <button
             key={tab}
@@ -150,6 +148,7 @@ export default function PricingManager({ fetcher }: Props) {
               cursor: 'pointer',
               fontWeight: 600,
               fontSize: '0.9rem',
+              flex: '1 1 160px',
               background: activeTab === tab ? 'var(--accent)' : 'rgba(255,255,255,0.05)',
               color: activeTab === tab ? '#000' : 'var(--text-gray)',
               transition: 'all 0.2s'
@@ -242,7 +241,7 @@ export default function PricingManager({ fetcher }: Props) {
               </select>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            <div className="form-grid-2">
               <div className="form-group" style={{ marginBottom: 0 }}>
                 <label>Plan Name</label>
                 <input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="e.g. Boiler Service" />
@@ -256,7 +255,7 @@ export default function PricingManager({ fetcher }: Props) {
             </div>
 
             <div style={{ height: '1rem' }} />
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            <div className="form-grid-2">
               <div className="form-group" style={{ marginBottom: 0 }}>
                 <label>Price</label>
                 <input value={form.price} onChange={e => setForm(f => ({ ...f, price: e.target.value }))} placeholder="e.g. £80 or Free quotes available" />
@@ -299,7 +298,7 @@ export default function PricingManager({ fetcher }: Props) {
               + Add feature
             </button>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            <div className="form-grid-2">
               <div className="form-group" style={{ marginBottom: 0 }}>
                 <label>CTA Button Text</label>
                 <input value={form.ctaText} onChange={e => setForm(f => ({ ...f, ctaText: e.target.value }))} placeholder="e.g. Book Now" />

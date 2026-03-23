@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Trash2, Edit2, Upload, Plus, Check, X, Image } from 'lucide-react';
+import { Trash2, Edit2, Upload, Check, X, Image } from 'lucide-react';
 
 const API = 'https://direct-heating.duckdns.org/api';
 

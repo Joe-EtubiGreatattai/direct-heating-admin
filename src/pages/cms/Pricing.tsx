@@ -203,7 +203,7 @@ export default function PricingManager({ fetcher }: Props) {
               </button>
               <button
                 className="btn"
-                style={{ fontSize: '0.8rem', padding: '0.5rem', background: plan.featured ? 'rgba(201,169,98,0.15)' : 'rgba(255,255,255,0.03)', border: `1px solid ${plan.featured ? 'var(--accent)' : 'var(--card-border)'}`, color: plan.featured ? 'var(--accent)' : 'var(--text-gray)' }}
+                style={{ fontSize: '0.8rem', padding: '0.5rem', background: plan.featured ? 'rgba(233,226,68,0.15)' : 'rgba(255,255,255,0.03)', border: `1px solid ${plan.featured ? 'var(--accent)' : 'var(--card-border)'}`, color: plan.featured ? 'var(--accent)' : 'var(--text-gray)' }}
                 onClick={() => handleToggleFeatured(plan)}
                 title={plan.featured ? 'Unfeature' : 'Set as featured'}
               >

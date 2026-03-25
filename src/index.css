@@ -5,8 +5,8 @@
   --sidebar-bg: #121212;
   --card-bg: rgba(255, 255, 255, 0.03);
   --card-border: rgba(255, 255, 255, 0.08);
-  --accent: #c9a962;
-  --accent-hover: #e0bc6e;
+  --accent: #E9E244;
+  --accent-hover: #D4CE3B;
   --text-main: #ffffff;
   --text-gray: #a0a0a0;
   --success: #10b981;
@@ -56,6 +56,17 @@ body {
   letter-spacing: 2px;
   margin-bottom: 3.5rem;
   padding-left: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-left: 0;
+}
+
+.sidebar-logo-img {
+  display: block;
+  width: 100%;
+  max-width: 220px;
+  height: auto;
 }
 
 .nav-links {
@@ -86,7 +97,7 @@ body {
 .nav-link.active {
   background: var(--accent);
   color: var(--primary);
-  box-shadow: 0 4px 15px rgba(201, 169, 98, 0.3);
+  box-shadow: 0 4px 15px rgba(233, 226, 68, 0.3);
 }
 
 /* Main Content */
@@ -465,5 +476,282 @@ input:focus, select:focus, textarea:focus {
 
   td {
     padding: 1rem 0.75rem;
+  }
+}
+
+.bookings-calendar {
+  width: 100%;
+  max-width: 1100px;
+}
+
+.bookings-calendar-header {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.bookings-calendar-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.bookings-calendar-title {
+  color: var(--text-gray);
+  font-weight: 600;
+}
+
+.bookings-calendar-meta {
+  color: var(--text-gray);
+  font-size: 0.9rem;
+}
+
+.bookings-calendar-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 0.25rem;
+}
+
+.bookings-calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(120px, 1fr));
+  gap: 0.75rem;
+}
+
+.bookings-calendar-weekday {
+  color: var(--text-gray);
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding-left: 0.25rem;
+}
+
+.bookings-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(120px, 1fr));
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.bookings-calendar-day {
+  appearance: none;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 0.75rem;
+  height: clamp(96px, 14vw, 120px);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  text-align: left;
+  color: var(--text-main);
+  transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.bookings-calendar-day:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+.bookings-calendar-day:active {
+  transform: translateY(0);
+}
+
+.bookings-calendar-day[data-selected="true"] {
+  background: rgba(233, 226, 68, 0.16);
+  border-color: rgba(233, 226, 68, 0.55);
+}
+
+.bookings-calendar-day[data-inmonth="false"] {
+  opacity: 0.6;
+}
+
+.bookings-calendar-day-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.bookings-calendar-day-number {
+  font-weight: 800;
+  color: white;
+  line-height: 1;
+}
+
+.bookings-calendar-badges {
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.bookings-calendar-badge {
+  padding: 0.25rem 0.45rem;
+  border-radius: 8px;
+  font-size: 0.68rem;
+  letter-spacing: 0.4px;
+}
+
+.bookings-calendar-badge-google {
+  background: rgba(255, 255, 255, 0.08);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.bookings-calendar-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  overflow: hidden;
+}
+
+.bookings-calendar-preview-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.bookings-calendar-preview-row[data-kind="google"] {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.bookings-calendar-preview-time {
+  color: rgba(255, 255, 255, 0.6);
+  min-width: 52px;
+  flex-shrink: 0;
+}
+
+.bookings-calendar-preview-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bookings-calendar-preview-more {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.8rem;
+}
+
+.bookings-calendar-details {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.bookings-calendar-details-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.bookings-calendar-details-title {
+  font-weight: 800;
+}
+
+.bookings-calendar-details-list {
+  margin-top: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.bookings-calendar-empty {
+  color: var(--text-gray);
+}
+
+.bookings-calendar-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  color: var(--text-main);
+  font: inherit;
+  appearance: none;
+  padding: 0.75rem;
+  border-radius: 12px;
+}
+
+.bookings-calendar-item-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+  flex: 1 1 240px;
+}
+
+.bookings-calendar-item-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.bookings-calendar-item-title {
+  font-weight: 800;
+  min-width: 0;
+}
+
+.bookings-calendar-item-subtitle {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.85rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bookings-calendar-item-actions {
+  display: flex;
+  gap: 0.6rem;
+  justify-content: flex-end;
+  flex: 0 0 auto;
+}
+
+@media (max-width: 900px) {
+  .bookings-calendar-nav {
+    width: 100%;
+  }
+
+  .bookings-calendar-nav .btn {
+    flex: 1 1 0;
+  }
+
+  .bookings-calendar-title {
+    width: 100%;
+  }
+
+  .bookings-calendar-meta {
+    width: 100%;
+  }
+}
+
+@media (max-width: 520px) {
+  .bookings-calendar-weekdays,
+  .bookings-calendar-grid {
+    grid-template-columns: repeat(7, minmax(104px, 1fr));
+    gap: 0.6rem;
+  }
+
+  .bookings-calendar-day {
+    padding: 0.65rem;
+    height: clamp(92px, 22vw, 108px);
+  }
+
+  .bookings-calendar-preview-row {
+    font-size: 0.8rem;
+  }
+
+  .bookings-calendar-preview-time {
+    min-width: 48px;
   }
 }

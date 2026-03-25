@@ -46,7 +46,7 @@ export default function Dashboard({ fetcher }: Props) {
         <div className="card stat-card">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
             <span style={{ color: 'var(--text-gray)', fontWeight: 600 }}>Total Quotes</span>
-            <div style={{ background: 'rgba(201, 169, 98, 0.1)', padding: '0.8rem', borderRadius: '12px', color: 'var(--accent)' }}>
+            <div style={{ background: 'rgba(233, 226, 68, 0.1)', padding: '0.8rem', borderRadius: '12px', color: 'var(--accent)' }}>
               <MessageSquare size={24} />
             </div>
           </div>

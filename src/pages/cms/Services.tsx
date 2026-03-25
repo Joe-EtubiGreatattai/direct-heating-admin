@@ -102,7 +102,7 @@ export default function ServicesManager({ fetcher }: Props) {
               <div style={{ flex: 1 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.4rem', flexWrap: 'wrap' }}>
                   <strong style={{ fontSize: '1.05rem' }}>{item.title}</strong>
-                  {item.label && <span style={{ background: 'rgba(201,169,98,0.15)', color: 'var(--accent)', padding: '0.2rem 0.6rem', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 600 }}>{item.label}</span>}
+                  {item.label && <span style={{ background: 'rgba(233,226,68,0.15)', color: 'var(--accent)', padding: '0.2rem 0.6rem', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 600 }}>{item.label}</span>}
                   {!item.active && <span style={{ color: 'var(--warning)', fontSize: '0.75rem', fontWeight: 700 }}>HIDDEN</span>}
                 </div>
                 <p style={{ color: 'var(--text-gray)', fontSize: '0.9rem', lineHeight: 1.6, marginBottom: '0.5rem' }}>{item.description}</p>

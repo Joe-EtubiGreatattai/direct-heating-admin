@@ -2,6 +2,22 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { Trash2, Edit2, Upload, Check, X, Image } from 'lucide-react';
 
 const API = 'https://direct-heating.duckdns.org/api';
+const MEDIA_ORIGIN = new URL(API).origin;
+
+function normalizeImageSrc(src: string) {
+  if (!src) return src;
+
+  if (src.startsWith('/')) {
+    return `${MEDIA_ORIGIN}${src}`;
+  }
+
+  try {
+    const parsed = new URL(src);
+    return `${MEDIA_ORIGIN}${parsed.pathname}`;
+  } catch {
+    return src;
+  }
+}
 
 interface GalleryItem {
   _id: string;
@@ -32,7 +48,11 @@ export default function GalleryManager({ fetcher }: Props) {
     try {
       const res = await fetcher(`${API}/admin/cms/gallery`);
       const data = await res.json();
-      setItems(data);
+      if (Array.isArray(data)) {
+        setItems(data.map((item: GalleryItem) => ({ ...item, src: normalizeImageSrc(item.src) })));
+      } else {
+        setItems([]);
+      }
     } finally {
       setLoading(false);
     }
@@ -52,7 +72,7 @@ export default function GalleryManager({ fetcher }: Props) {
       body: JSON.stringify({ active: !item.active })
     });
     const updated = await res.json();
-    setItems(prev => prev.map(i => i._id === updated._id ? updated : i));
+    setItems(prev => prev.map(i => i._id === updated._id ? { ...updated, src: normalizeImageSrc(updated.src) } : i));
   }
 
   async function handleSaveEdit() {
@@ -64,7 +84,8 @@ export default function GalleryManager({ fetcher }: Props) {
         body: JSON.stringify({ alt: editingItem.alt, caption: editingItem.caption })
       });
       const updated = await res.json();
-      setItems(prev => prev.map(i => i._id === updated._id ? updated : i));
+      const normalized = { ...updated, src: normalizeImageSrc(updated.src) } as GalleryItem;
+      setItems(prev => prev.map(i => i._id === normalized._id ? normalized : i));
       setEditingItem(null);
     } finally {
       setSaving(false);
@@ -97,7 +118,7 @@ export default function GalleryManager({ fetcher }: Props) {
         body: formData
       });
       const item = await res.json();
-      setItems(prev => [...prev, item]);
+      setItems(prev => [...prev, { ...item, src: normalizeImageSrc(item.src) }]);
       setShowUploadModal(false);
       setUploadPreview(null);
       setSelectedFile(null);

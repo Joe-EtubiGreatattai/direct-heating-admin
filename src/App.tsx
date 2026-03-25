@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, NavLink, Navigate } from 'react-router-dom';
-import { LayoutDashboard, MessageSquare, Calendar, Settings as SettingsIcon, LogOut, Images, Star, Wrench, HelpCircle, Layout, ChevronDown, ChevronRight, DollarSign, Menu, X } from 'lucide-react';
+import { LayoutDashboard, MessageSquare, Calendar, Settings as SettingsIcon, LogOut, Layout, ChevronDown, ChevronRight, Menu, X, Home, Phone, BriefcaseBusiness, Building2, PoundSterling, Star, CalendarDays } from 'lucide-react';
 import LoginPage from './LoginPage';
 import Dashboard from './pages/Dashboard';
 import Quotes from './pages/Quotes';
@@ -12,6 +12,7 @@ import ServicesManager from './pages/cms/Services';
 import FAQsManager from './pages/cms/FAQs';
 import HeroContentManager from './pages/cms/HeroContent';
 import PricingManager from './pages/cms/Pricing';
+import CmsPageSections from './pages/cms/PageSections';
 
 function App() {
   const [token, setToken] = useState<string | null>(localStorage.getItem('adminToken'));
@@ -66,7 +67,9 @@ function App() {
         <button type="button" className="sidebar-backdrop" onClick={closeSidebar} aria-label="Close menu" />
 
         <aside className="sidebar">
-          <Link to="/" className="sidebar-logo" onClick={closeSidebar}>DIRECT HEATING</Link>
+          <Link to="/" className="sidebar-logo" onClick={closeSidebar} aria-label="Direct Heating Dashboard">
+            <img src="/direct-heating-logo-tsp-white.png" alt="Direct Heating" className="sidebar-logo-img" />
+          </Link>
           <nav className="nav-links">
             <NavLink to="/" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} end onClick={closeSidebar}>
               <LayoutDashboard size={20} /> <div style={{ display: 'flex', flex: 1 }}>Dashboard</div>
@@ -95,23 +98,29 @@ function App() {
 
               {cmsOpen && (
                 <div style={{ paddingLeft: '1rem', display: 'flex', flexDirection: 'column', gap: '0.25rem', marginTop: '0.25rem' }}>
-                  <NavLink to="/cms/hero" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} style={{ fontSize: '0.9rem', padding: '0.65rem 1rem' }} onClick={closeSidebar}>
-                    <Layout size={17} /> <div style={{ display: 'flex', flex: 1 }}>Hero Banner</div>
+                  <NavLink to="/cms/site/home" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} style={{ fontSize: '0.9rem', padding: '0.65rem 1rem' }} onClick={closeSidebar}>
+                    <Home size={17} /> <div style={{ display: 'flex', flex: 1 }}>Home</div>
                   </NavLink>
-                  <NavLink to="/cms/gallery" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} style={{ fontSize: '0.9rem', padding: '0.65rem 1rem' }} onClick={closeSidebar}>
-                    <Images size={17} /> <div style={{ display: 'flex', flex: 1 }}>Gallery</div>
+                  <NavLink to="/cms/site/services" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} style={{ fontSize: '0.9rem', padding: '0.65rem 1rem' }} onClick={closeSidebar}>
+                    <BriefcaseBusiness size={17} /> <div style={{ display: 'flex', flex: 1 }}>Services</div>
                   </NavLink>
-                  <NavLink to="/cms/testimonials" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} style={{ fontSize: '0.9rem', padding: '0.65rem 1rem' }} onClick={closeSidebar}>
-                    <Star size={17} /> <div style={{ display: 'flex', flex: 1 }}>Testimonials</div>
+                  <NavLink to="/cms/site/pricing" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} style={{ fontSize: '0.9rem', padding: '0.65rem 1rem' }} onClick={closeSidebar}>
+                    <PoundSterling size={17} /> <div style={{ display: 'flex', flex: 1 }}>Pricing</div>
                   </NavLink>
-                  <NavLink to="/cms/services" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} style={{ fontSize: '0.9rem', padding: '0.65rem 1rem' }} onClick={closeSidebar}>
-                    <Wrench size={17} /> <div style={{ display: 'flex', flex: 1 }}>Services</div>
+                  <NavLink to="/cms/site/testimonials" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} style={{ fontSize: '0.9rem', padding: '0.65rem 1rem' }} onClick={closeSidebar}>
+                    <Star size={17} /> <div style={{ display: 'flex', flex: 1 }}>Reviews</div>
                   </NavLink>
-                  <NavLink to="/cms/faqs" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} style={{ fontSize: '0.9rem', padding: '0.65rem 1rem' }} onClick={closeSidebar}>
-                    <HelpCircle size={17} /> <div style={{ display: 'flex', flex: 1 }}>FAQs</div>
+                  <NavLink to="/cms/site/contact" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} style={{ fontSize: '0.9rem', padding: '0.65rem 1rem' }} onClick={closeSidebar}>
+                    <Phone size={17} /> <div style={{ display: 'flex', flex: 1 }}>Contact Us</div>
                   </NavLink>
-                  <NavLink to="/cms/pricing" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} style={{ fontSize: '0.9rem', padding: '0.65rem 1rem' }} onClick={closeSidebar}>
-                    <DollarSign size={17} /> <div style={{ display: 'flex', flex: 1 }}>Pricing</div>
+                  <NavLink to="/cms/site/household" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} style={{ fontSize: '0.9rem', padding: '0.65rem 1rem' }} onClick={closeSidebar}>
+                    <Building2 size={17} /> <div style={{ display: 'flex', flex: 1 }}>Household</div>
+                  </NavLink>
+                  <NavLink to="/cms/site/business" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} style={{ fontSize: '0.9rem', padding: '0.65rem 1rem' }} onClick={closeSidebar}>
+                    <Building2 size={17} /> <div style={{ display: 'flex', flex: 1 }}>Business</div>
+                  </NavLink>
+                  <NavLink to="/cms/site/book-now" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} style={{ fontSize: '0.9rem', padding: '0.65rem 1rem' }} onClick={closeSidebar}>
+                    <CalendarDays size={17} /> <div style={{ display: 'flex', flex: 1 }}>Book Now</div>
                   </NavLink>
                 </div>
               )}
@@ -133,6 +142,8 @@ function App() {
             <Route path="/quotes" element={<Quotes fetcher={authenticatedFetch} />} />
             <Route path="/bookings" element={<Bookings fetcher={authenticatedFetch} />} />
             <Route path="/settings" element={<Settings fetcher={authenticatedFetch} />} />
+            <Route path="/cms" element={<Navigate to="/cms/site/home" replace />} />
+            <Route path="/cms/site/:pageKey" element={<CmsPageSections fetcher={authenticatedFetch} />} />
             <Route path="/cms/gallery" element={<GalleryManager fetcher={authenticatedFetch} />} />
             <Route path="/cms/testimonials" element={<TestimonialsManager fetcher={authenticatedFetch} />} />
             <Route path="/cms/services" element={<ServicesManager fetcher={authenticatedFetch} />} />

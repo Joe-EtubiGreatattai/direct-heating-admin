@@ -222,7 +222,7 @@ export default function HeroContentManager({ fetcher }: Props) {
           {field('WhatsApp Number (digits only)', 'whatsappNumber', 'e.g. 442046008746')}
         </div>
 
-        <div className="card" style={{ background: 'rgba(201,169,98,0.05)', border: '1px solid rgba(201,169,98,0.2)' }}>
+        <div className="card" style={{ background: 'rgba(233,226,68,0.05)', border: '1px solid rgba(233,226,68,0.2)' }}>
           <h3 style={{ marginBottom: '1rem', color: 'var(--accent)' }}>Live Preview</h3>
           <div style={{ background: 'rgba(0,0,0,0.3)', borderRadius: '12px', padding: '1.5rem' }}>
             <h2 style={{ fontSize: '1.4rem', lineHeight: 1.3, marginBottom: '0.75rem' }}>

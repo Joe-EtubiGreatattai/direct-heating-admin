@@ -55,7 +55,7 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
           <div style={{
             display: 'inline-flex',
             padding: '1rem',
-            background: 'rgba(201, 169, 98, 0.1)',
+            background: 'rgba(233, 226, 68, 0.1)',
             borderRadius: '20px',
             color: 'var(--accent)',
             marginBottom: '1.5rem',

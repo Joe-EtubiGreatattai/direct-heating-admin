@@ -108,7 +108,7 @@ export default function TestimonialsManager({ fetcher }: Props) {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem', flexWrap: 'wrap' }}>
                   <strong>{item.name}</strong>
                   <span style={{ color: '#f59e0b' }}>{'★'.repeat(item.rating)}</span>
-                  <span style={{ background: 'rgba(201,169,98,0.15)', color: 'var(--accent)', padding: '0.2rem 0.6rem', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 600 }}>{item.badge}</span>
+                  <span style={{ background: 'rgba(233,226,68,0.15)', color: 'var(--accent)', padding: '0.2rem 0.6rem', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 600 }}>{item.badge}</span>
                   {!item.active && <span style={{ color: 'var(--warning)', fontSize: '0.75rem', fontWeight: 700 }}>HIDDEN</span>}
                 </div>
                 <p style={{ color: 'var(--text-gray)', fontSize: '0.9rem', lineHeight: 1.6 }}>&ldquo;{item.review}&rdquo;</p>

@@ -68,7 +68,7 @@ function App() {
 
         <aside className="sidebar">
           <Link to="/" className="sidebar-logo" onClick={closeSidebar} aria-label="Direct Heating Dashboard">
-            <img src="/direct-heating-logo-tsp-white.png" alt="Direct Heating" className="sidebar-logo-img" />
+            <img src="/admin/direct-heating-logo-tsp-white.png" alt="Direct Heating" className="sidebar-logo-img" />
           </Link>
           <nav className="nav-links">
             <NavLink to="/" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} end onClick={closeSidebar}>

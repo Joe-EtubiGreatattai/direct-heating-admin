@@ -44,6 +44,8 @@ body {
   padding: 2.5rem 1.5rem;
   position: fixed;
   height: 100vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   z-index: 100;
   transition: all 0.3s ease;
 }

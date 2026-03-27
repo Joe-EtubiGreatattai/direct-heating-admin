@@ -90,6 +90,12 @@ function dateFromIsoLike(value: string) {
   return ymd(dt);
 }
 
+const COMMERCIAL_TYPES = ['commercial', 'property'];
+
+function quoteCategory(q: Quote): 'domestic' | 'commercial' {
+  return COMMERCIAL_TYPES.includes((q.customerType || '').toLowerCase()) ? 'commercial' : 'domestic';
+}
+
 export default function Quotes({ fetcher }: Props) {
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [selected, setSelected] = useState<Quote | null>(null);
@@ -98,6 +104,11 @@ export default function Quotes({ fetcher }: Props) {
   const [viewMode, setViewMode] = useState<'calendar' | 'list'>(() => {
     const stored = typeof window !== 'undefined' ? window.localStorage.getItem('admin.quotes.viewMode') : null;
     return stored === 'calendar' ? 'calendar' : 'list';
+  });
+  const [categoryFilter, setCategoryFilter] = useState<'all' | 'domestic' | 'commercial'>(() => {
+    const stored = typeof window !== 'undefined' ? window.localStorage.getItem('admin.quotes.categoryFilter') : null;
+    if (stored === 'domestic' || stored === 'commercial') return stored;
+    return 'all';
   });
   const [month, setMonth] = useState<Date>(() => startOfMonth(new Date()));
   const [selectedDay, setSelectedDay] = useState<string>(() => ymd(new Date()));
@@ -146,6 +157,15 @@ export default function Quotes({ fetcher }: Props) {
   useEffect(() => {
     window.localStorage.setItem('admin.quotes.viewMode', viewMode);
   }, [viewMode]);
+
+  useEffect(() => {
+    window.localStorage.setItem('admin.quotes.categoryFilter', categoryFilter);
+  }, [categoryFilter]);
+
+  const filteredQuotes = useMemo(() => {
+    if (categoryFilter === 'all') return quotes;
+    return quotes.filter(q => quoteCategory(q) === categoryFilter);
+  }, [quotes, categoryFilter]);
 
   useEffect(() => {
     let cancelled = false;
@@ -255,6 +275,11 @@ export default function Quotes({ fetcher }: Props) {
 
       {viewMode === 'list' ? (
         <div className="card table-card">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
+            <button type="button" className="btn" onClick={() => setCategoryFilter('all')} style={categoryFilter === 'all' ? { background: 'rgba(255,255,255,0.15)', color: 'var(--text-main)' } : undefined}>All Types</button>
+            <button type="button" className="btn" onClick={() => setCategoryFilter('domestic')} style={categoryFilter === 'domestic' ? { background: 'rgba(255,255,255,0.15)', color: 'var(--text-main)' } : undefined}>Domestic</button>
+            <button type="button" className="btn" onClick={() => setCategoryFilter('commercial')} style={categoryFilter === 'commercial' ? { background: 'rgba(255,255,255,0.15)', color: 'var(--text-main)' } : undefined}>Commercial</button>
+          </div>
           <table style={{ minWidth: '720px' }}>
             <thead>
               <tr>
@@ -265,7 +290,7 @@ export default function Quotes({ fetcher }: Props) {
               </tr>
             </thead>
             <tbody>
-              {quotes.map(q => (
+              {filteredQuotes.map(q => (
                 <tr key={q._id} onClick={() => setSelected(q)} style={{ cursor: 'pointer' }}>
                   <td>
                     <div style={{ fontWeight: 600 }}>{q.firstName} {q.lastName}</div>
@@ -276,12 +301,17 @@ export default function Quotes({ fetcher }: Props) {
                     <div style={{ fontSize: '0.8rem', color: 'var(--text-gray)' }}>{q.customerType}</div>
                   </td>
                   <td style={{ color: 'var(--text-gray)' }}>{new Date(q.createdAt).toLocaleDateString()}</td>
-                  <td><span className={`badge badge-${q.status}`}>{q.status}</span></td>
+                  <td>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                      <span className={`badge badge-${q.status}`}>{q.status}</span>
+                      <span className="badge" style={{ background: quoteCategory(q) === 'commercial' ? 'rgba(139,92,246,0.15)' : 'rgba(16,185,129,0.15)', color: quoteCategory(q) === 'commercial' ? '#a78bfa' : '#34d399', border: 'none' }}>{quoteCategory(q) === 'commercial' ? 'Commercial' : 'Domestic'}</span>
+                    </div>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
-          {quotes.length === 0 && (
+          {filteredQuotes.length === 0 && (
             <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-gray)' }}>
               <Mail size={48} style={{ marginBottom: '1rem', opacity: 0.2 }} />
               <p>No quote inquiries received yet.</p>

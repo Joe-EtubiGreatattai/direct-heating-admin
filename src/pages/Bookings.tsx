@@ -9,9 +9,20 @@ interface Booking {
   _id: string;
   fullName: string;
   email: string;
+  address?: string;
+  jobType?: string;
+  customerType?: string;
   date: string;
   timeSlot: string;
+  slotCount?: number;
   status: string;
+  estimatedArrival?: string;
+}
+
+const COMMERCIAL_TYPES = ['commercial', 'property'];
+
+function bookingCategory(b: Booking): 'domestic' | 'commercial' {
+  return COMMERCIAL_TYPES.includes((b.customerType || '').toLowerCase()) ? 'commercial' : 'domestic';
 }
 
 interface Props {
@@ -96,15 +107,22 @@ export default function Bookings({ fetcher }: Props) {
     const stored = typeof window !== 'undefined' ? window.localStorage.getItem('admin.bookings.viewMode') : null;
     return stored === 'list' ? 'list' : 'calendar';
   });
-  const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'accepted' | 'rejected'>(() => {
+  const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'accepted' | 'rejected' | 'cancelled'>(() => {
     const stored = typeof window !== 'undefined' ? window.localStorage.getItem('admin.bookings.statusFilter') : null;
-    if (stored === 'pending' || stored === 'accepted' || stored === 'rejected') return stored;
+    if (stored === 'pending' || stored === 'accepted' || stored === 'rejected' || stored === 'cancelled') return stored;
+    return 'all';
+  });
+  const [categoryFilter, setCategoryFilter] = useState<'all' | 'domestic' | 'commercial'>(() => {
+    const stored = typeof window !== 'undefined' ? window.localStorage.getItem('admin.bookings.categoryFilter') : null;
+    if (stored === 'domestic' || stored === 'commercial') return stored;
     return 'all';
   });
   const [month, setMonth] = useState<Date>(() => startOfMonth(new Date()));
   const [selectedDay, setSelectedDay] = useState<string>(() => ymd(new Date()));
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [adminNote, setAdminNote] = useState('');
+  const [estimatedArrival, setEstimatedArrival] = useState('');
+  const [slotCount, setSlotCount] = useState(1);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
   const bookingIdFromUrl = new URLSearchParams(window.location.search).get('bookingId');
@@ -220,6 +238,8 @@ export default function Bookings({ fetcher }: Props) {
     setUpdatingId(id);
     setUpdatingStatus(status);
     setAdminNote('');
+    setEstimatedArrival('');
+    setSlotCount(1);
     setIsModalOpen(true);
   };
 
@@ -228,7 +248,7 @@ export default function Bookings({ fetcher }: Props) {
 
     await fetcher(`${API_BASE}/admin/bookings/${updatingId}`, {
       method: 'PUT',
-      body: JSON.stringify({ status: updatingStatus, adminNote })
+      body: JSON.stringify({ status: updatingStatus, adminNote, estimatedArrival, slotCount })
     });
 
     setIsModalOpen(false);
@@ -245,10 +265,15 @@ export default function Bookings({ fetcher }: Props) {
     window.localStorage.setItem('admin.bookings.statusFilter', statusFilter);
   }, [statusFilter]);
 
+  useEffect(() => {
+    window.localStorage.setItem('admin.bookings.categoryFilter', categoryFilter);
+  }, [categoryFilter]);
+
   const listBookings = useMemo(() => {
     const filtered = bookings.filter(b => {
-      if (statusFilter === 'all') return true;
-      return b.status === statusFilter;
+      if (statusFilter !== 'all' && b.status !== statusFilter) return false;
+      if (categoryFilter !== 'all' && bookingCategory(b) !== categoryFilter) return false;
+      return true;
     });
     filtered.sort((a, b) => {
       const keyA = `${a.date} ${a.timeSlot}`;
@@ -256,7 +281,7 @@ export default function Bookings({ fetcher }: Props) {
       return keyB.localeCompare(keyA);
     });
     return filtered;
-  }, [bookings, statusFilter]);
+  }, [bookings, statusFilter, categoryFilter]);
 
   return (
     <div style={{ animation: 'fadeIn 0.6s ease-out', position: 'relative' }}>
@@ -392,6 +417,9 @@ export default function Bookings({ fetcher }: Props) {
                       </div>
                       <div className="bookings-calendar-item-subtitle">
                         {item.time} · {booking?.email || ''}
+                        {booking?.jobType && <> · {booking.jobType}</>}
+                        {(booking?.slotCount ?? 1) > 1 && <> · {booking?.slotCount} slots</>}
+                        {booking?.address && <> · {booking.address}</>}
                       </div>
                     </div>
                     <div className="bookings-calendar-item-actions">
@@ -411,11 +439,19 @@ export default function Bookings({ fetcher }: Props) {
       ) : (
         <div className="card">
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-              <button type="button" className="btn" onClick={() => setStatusFilter('all')} style={statusFilter === 'all' ? { background: 'var(--accent)', color: '#000' } : undefined}>All</button>
-              <button type="button" className="btn" onClick={() => setStatusFilter('pending')} style={statusFilter === 'pending' ? { background: 'var(--accent)', color: '#000' } : undefined}>Pending</button>
-              <button type="button" className="btn" onClick={() => setStatusFilter('accepted')} style={statusFilter === 'accepted' ? { background: 'var(--accent)', color: '#000' } : undefined}>Accepted</button>
-              <button type="button" className="btn" onClick={() => setStatusFilter('rejected')} style={statusFilter === 'rejected' ? { background: 'var(--accent)', color: '#000' } : undefined}>Rejected</button>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                <button type="button" className="btn" onClick={() => setStatusFilter('all')} style={statusFilter === 'all' ? { background: 'var(--accent)', color: '#000' } : undefined}>All</button>
+                <button type="button" className="btn" onClick={() => setStatusFilter('pending')} style={statusFilter === 'pending' ? { background: 'var(--accent)', color: '#000' } : undefined}>Pending</button>
+                <button type="button" className="btn" onClick={() => setStatusFilter('accepted')} style={statusFilter === 'accepted' ? { background: 'var(--accent)', color: '#000' } : undefined}>Accepted</button>
+                <button type="button" className="btn" onClick={() => setStatusFilter('rejected')} style={statusFilter === 'rejected' ? { background: 'var(--accent)', color: '#000' } : undefined}>Rejected</button>
+                <button type="button" className="btn" onClick={() => setStatusFilter('cancelled')} style={statusFilter === 'cancelled' ? { background: 'var(--accent)', color: '#000' } : undefined}>Cancelled</button>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                <button type="button" className="btn" onClick={() => setCategoryFilter('all')} style={categoryFilter === 'all' ? { background: 'rgba(255,255,255,0.15)', color: 'var(--text-main)' } : undefined}>All Types</button>
+                <button type="button" className="btn" onClick={() => setCategoryFilter('domestic')} style={categoryFilter === 'domestic' ? { background: 'rgba(255,255,255,0.15)', color: 'var(--text-main)' } : undefined}>Domestic</button>
+                <button type="button" className="btn" onClick={() => setCategoryFilter('commercial')} style={categoryFilter === 'commercial' ? { background: 'rgba(255,255,255,0.15)', color: 'var(--text-main)' } : undefined}>Commercial</button>
+              </div>
             </div>
             <button type="button" className="btn" onClick={fetchBookings}>Refresh</button>
           </div>
@@ -442,8 +478,12 @@ export default function Bookings({ fetcher }: Props) {
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
                         <div style={{ fontWeight: 800 }}>{b.fullName}</div>
                         <span className={`badge badge-${b.status}`}>{b.status}</span>
+                        <span className="badge" style={{ background: bookingCategory(b) === 'commercial' ? 'rgba(139,92,246,0.15)' : 'rgba(16,185,129,0.15)', color: bookingCategory(b) === 'commercial' ? '#a78bfa' : '#34d399', border: 'none' }}>{bookingCategory(b) === 'commercial' ? 'Commercial' : 'Domestic'}</span>
+                        {(b.slotCount ?? 1) > 1 && <span className="badge" style={{ background: 'rgba(233,226,68,0.15)', color: 'var(--accent)', border: 'none' }}>{b.slotCount} slots</span>}
                       </div>
                       <div style={{ color: 'var(--text-gray)', fontSize: '0.9rem' }}>{b.email}</div>
+                      {b.jobType && <div style={{ color: 'var(--text-gray)', fontSize: '0.9rem' }}>{b.jobType}</div>}
+                      {b.address && <div style={{ color: 'var(--text-gray)', fontSize: '0.9rem' }}>{b.address}</div>}
                       <div style={{ color: 'var(--text-gray)', fontSize: '0.9rem' }}>
                         {b.date} · {b.timeSlot}
                       </div>
@@ -496,6 +536,27 @@ export default function Bookings({ fetcher }: Props) {
             <p style={{ color: 'var(--text-gray)', marginBottom: '1.5rem', fontSize: '0.95rem' }}>
               Add an optional message for the customer. They will receive this via email.
             </p>
+
+            {updatingStatus === 'accepted' && (
+              <>
+                <div className="form-group">
+                  <label>Job Duration (slots)</label>
+                  <select value={slotCount} onChange={(e) => setSlotCount(Number(e.target.value))}>
+                    {[1, 2, 3, 4, 5, 6, 7, 8].map(n => (
+                      <option key={n} value={n}>{n} {n === 1 ? 'slot' : 'slots'}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label>Estimated Arrival Time</label>
+                  <input
+                    type="time"
+                    value={estimatedArrival}
+                    onChange={(e) => setEstimatedArrival(e.target.value)}
+                  />
+                </div>
+              </>
+            )}
 
             <div className="form-group">
               <label>Message to Customer</label>

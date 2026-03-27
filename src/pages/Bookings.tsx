@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from 'react';
-import { Check, X, MessageSquare, Send } from 'lucide-react';
+import { Check, X, MessageSquare, Send, User, Mail, MapPin, Briefcase, Calendar, Clock, Layers, AlarmClock, Loader2 } from 'lucide-react';
 
 const API_BASE = 'https://direct-heating.duckdns.org/api';
 
@@ -120,11 +120,13 @@ export default function Bookings({ fetcher }: Props) {
   const [month, setMonth] = useState<Date>(() => startOfMonth(new Date()));
   const [selectedDay, setSelectedDay] = useState<string>(() => ymd(new Date()));
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isConfirming, setIsConfirming] = useState(false);
   const [adminNote, setAdminNote] = useState('');
   const [estimatedArrival, setEstimatedArrival] = useState('');
   const [slotCount, setSlotCount] = useState(1);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
+  const [detailBooking, setDetailBooking] = useState<Booking | null>(null);
   const bookingIdFromUrl = new URLSearchParams(window.location.search).get('bookingId');
   const deepLinkedBooking = bookingIdFromUrl ? bookings.find(b => b._id === bookingIdFromUrl) : null;
   const deepLinkedMonth = deepLinkedBooking ? ymdToDate(deepLinkedBooking.date) : null;
@@ -245,12 +247,14 @@ export default function Bookings({ fetcher }: Props) {
 
   const confirmUpdate = async () => {
     if (!updatingId || !updatingStatus) return;
+    setIsConfirming(true);
 
     await fetcher(`${API_BASE}/admin/bookings/${updatingId}`, {
       method: 'PUT',
       body: JSON.stringify({ status: updatingStatus, adminNote, estimatedArrival, slotCount })
     });
 
+    setIsConfirming(false);
     setIsModalOpen(false);
     setUpdatingId(null);
     setUpdatingStatus(null);
@@ -409,7 +413,7 @@ export default function Bookings({ fetcher }: Props) {
 
                 const booking = bookings.find(b => b._id === item.bookingId);
                 return (
-                  <div key={item.id} className="bookings-calendar-item">
+                  <div key={item.id} className="bookings-calendar-item" onClick={() => booking && setDetailBooking(booking)} style={{ cursor: 'pointer' }}>
                     <div className="bookings-calendar-item-main">
                       <div className="bookings-calendar-item-row">
                         <div className="bookings-calendar-item-title">{item.title}</div>
@@ -422,7 +426,7 @@ export default function Bookings({ fetcher }: Props) {
                         {booking?.address && <> · {booking.address}</>}
                       </div>
                     </div>
-                    <div className="bookings-calendar-item-actions">
+                    <div className="bookings-calendar-item-actions" onClick={e => e.stopPropagation()}>
                       {item.status === 'pending' && (
                         <>
                           <button onClick={() => handleOpenModal(item.bookingId, 'accepted')} className="btn btn-success" title="Accept"><Check size={18} /></button>
@@ -467,8 +471,10 @@ export default function Bookings({ fetcher }: Props) {
                 <div
                   key={b._id}
                   className="card"
+                  onClick={() => setDetailBooking(b)}
                   style={{
                     margin: 0,
+                    cursor: 'pointer',
                     background: isDeepLinked ? 'rgba(233, 226, 68, 0.08)' : undefined,
                     borderColor: isDeepLinked ? 'rgba(233, 226, 68, 0.35)' : undefined
                   }}
@@ -489,7 +495,7 @@ export default function Bookings({ fetcher }: Props) {
                       </div>
                     </div>
 
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <div style={{ display: 'flex', gap: '0.5rem' }} onClick={e => e.stopPropagation()}>
                       {b.status === 'pending' && (
                         <>
                           <button onClick={() => handleOpenModal(b._id, 'accepted')} className="btn btn-success" title="Accept"><Check size={18} /></button>
@@ -501,6 +507,62 @@ export default function Bookings({ fetcher }: Props) {
                 </div>
               );
             })}
+          </div>
+        </div>
+      )}
+
+      {/* Detail Modal */}
+      {detailBooking && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem', overflowY: 'auto', animation: 'fadeIn 0.3s ease-out' }}
+          onClick={() => setDetailBooking(null)}>
+          <div className="card" style={{ width: '100%', maxWidth: '520px', position: 'relative' }} onClick={e => e.stopPropagation()}>
+            <button onClick={() => setDetailBooking(null)} style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'rgba(255,255,255,0.08)', border: 'none', color: 'var(--text-gray)', borderRadius: '8px', padding: '0.3rem 0.6rem', cursor: 'pointer', fontSize: '1rem' }}>✕</button>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
+              <div style={{ background: 'rgba(233,226,68,0.12)', padding: '0.75rem', borderRadius: '12px' }}>
+                <User size={22} style={{ color: 'var(--accent)' }} />
+              </div>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '1.2rem' }}>{detailBooking.fullName}</h3>
+                <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.3rem', flexWrap: 'wrap' }}>
+                  <span className={`badge badge-${detailBooking.status}`}>{detailBooking.status}</span>
+                  <span className="badge" style={{ background: bookingCategory(detailBooking) === 'commercial' ? 'rgba(139,92,246,0.15)' : 'rgba(16,185,129,0.15)', color: bookingCategory(detailBooking) === 'commercial' ? '#a78bfa' : '#34d399', border: 'none' }}>
+                    {bookingCategory(detailBooking) === 'commercial' ? 'Commercial' : 'Domestic'}
+                  </span>
+                  {(detailBooking.slotCount ?? 1) > 1 && <span className="badge" style={{ background: 'rgba(233,226,68,0.15)', color: 'var(--accent)', border: 'none' }}>{detailBooking.slotCount} slots</span>}
+                </div>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.5rem' }}>
+              {[
+                { icon: <Mail size={15} />, label: 'Email', value: detailBooking.email },
+                { icon: <MapPin size={15} />, label: 'Address', value: detailBooking.address || '—' },
+                { icon: <Briefcase size={15} />, label: 'Job Type', value: detailBooking.jobType || '—' },
+                { icon: <User size={15} />, label: 'Customer Type', value: detailBooking.customerType || '—' },
+                { icon: <Calendar size={15} />, label: 'Date', value: detailBooking.date },
+                { icon: <Clock size={15} />, label: 'Time Slot', value: detailBooking.timeSlot },
+                { icon: <Layers size={15} />, label: 'Slot Count', value: `${detailBooking.slotCount ?? 1} slot${(detailBooking.slotCount ?? 1) > 1 ? 's' : ''}` },
+                { icon: <AlarmClock size={15} />, label: 'Est. Arrival', value: detailBooking.estimatedArrival || '—' },
+              ].map(({ icon, label, value }) => (
+                <div key={label} style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start', padding: '0.6rem 0.75rem', background: 'rgba(255,255,255,0.04)', borderRadius: '10px' }}>
+                  <span style={{ color: 'var(--text-gray)', marginTop: '1px', flexShrink: 0 }}>{icon}</span>
+                  <span style={{ color: 'var(--text-gray)', fontSize: '0.85rem', minWidth: '100px', flexShrink: 0 }}>{label}</span>
+                  <span style={{ fontSize: '0.9rem', wordBreak: 'break-word' }}>{value}</span>
+                </div>
+              ))}
+            </div>
+
+            {detailBooking.status === 'pending' && (
+              <div style={{ display: 'flex', gap: '0.75rem' }} onClick={e => e.stopPropagation()}>
+                <button onClick={() => { setDetailBooking(null); handleOpenModal(detailBooking._id, 'accepted'); }} className="btn btn-success" style={{ flex: 1, justifyContent: 'center' }}>
+                  <Check size={16} /> Accept
+                </button>
+                <button onClick={() => { setDetailBooking(null); handleOpenModal(detailBooking._id, 'rejected'); }} className="btn btn-danger" style={{ flex: 1, justifyContent: 'center' }}>
+                  <X size={16} /> Reject
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -549,11 +611,37 @@ export default function Bookings({ fetcher }: Props) {
                 </div>
                 <div className="form-group">
                   <label>Estimated Arrival Time</label>
-                  <input
-                    type="time"
-                    value={estimatedArrival}
-                    onChange={(e) => setEstimatedArrival(e.target.value)}
-                  />
+                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                    <select
+                      value={estimatedArrival ? estimatedArrival.split(':')[0] : ''}
+                      onChange={e => {
+                        const h = e.target.value;
+                        const m = estimatedArrival ? (estimatedArrival.split(':')[1] || '00') : '00';
+                        setEstimatedArrival(h ? `${h}:${m}` : '');
+                      }}
+                      style={{ flex: 1 }}
+                    >
+                      <option value="">Hour</option>
+                      {Array.from({ length: 13 }, (_, i) => i + 7).map(h => (
+                        <option key={h} value={String(h).padStart(2, '0')}>
+                          {h < 12 ? `${h} AM` : h === 12 ? '12 PM' : `${h - 12} PM`}
+                        </option>
+                      ))}
+                    </select>
+                    <span style={{ color: 'var(--text-gray)', fontWeight: 700 }}>:</span>
+                    <select
+                      value={estimatedArrival ? (estimatedArrival.split(':')[1] || '00') : '00'}
+                      onChange={e => {
+                        const h = estimatedArrival ? estimatedArrival.split(':')[0] : '';
+                        setEstimatedArrival(h ? `${h}:${e.target.value}` : '');
+                      }}
+                      style={{ flex: 1 }}
+                    >
+                      {['00', '15', '30', '45'].map(m => (
+                        <option key={m} value={m}>{m}</option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
               </>
             )}
@@ -569,15 +657,19 @@ export default function Bookings({ fetcher }: Props) {
             </div>
 
             <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-              <button onClick={() => setIsModalOpen(false)} className="btn" style={{ flex: 1, background: 'rgba(255,255,255,0.05)', color: 'white' }}>
+              <button onClick={() => setIsModalOpen(false)} className="btn" style={{ flex: 1, background: 'rgba(255,255,255,0.05)', color: 'white' }} disabled={isConfirming}>
                 Cancel
               </button>
               <button
                 onClick={confirmUpdate}
                 className="btn btn-primary"
-                style={{ flex: 1, background: updatingStatus === 'accepted' ? 'var(--success)' : 'var(--danger)', color: 'white' }}
+                style={{ flex: 1, background: updatingStatus === 'accepted' ? 'var(--success)' : 'var(--danger)', color: 'white', opacity: isConfirming ? 0.7 : 1 }}
+                disabled={isConfirming}
               >
-                Confirm {updatingStatus === 'accepted' ? 'Accept' : 'Reject'} <Send size={16} />
+                {isConfirming
+                  ? <><Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> {updatingStatus === 'accepted' ? 'Accepting…' : 'Rejecting…'}</>
+                  : <>Confirm {updatingStatus === 'accepted' ? 'Accept' : 'Reject'} <Send size={16} /></>
+                }
               </button>
             </div>
           </div>

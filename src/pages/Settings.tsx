@@ -5,10 +5,17 @@ const API_BASE = 'https://direct-heating.duckdns.org/api';
 
 type Fetcher = (url: string, options?: RequestInit) => Promise<Response>;
 
+interface FixedSlot {
+  time: string;
+  label: string;
+}
+
 interface BookingSettings {
   openingTime: string;
   closingTime: string;
   slotDuration: number;
+  useFixedSlots: boolean;
+  fixedSlots: FixedSlot[];
   workingDays: number[];
   unavailableDates: string[];
 }
@@ -88,6 +95,13 @@ export default function Settings({ fetcher }: Props) {
     openingTime: '08:00',
     closingTime: '18:00',
     slotDuration: 60,
+    useFixedSlots: true,
+    fixedSlots: [
+      { time: '08:00', label: 'Morning (8am-12pm) - Slot 1' },
+      { time: '10:00', label: 'Morning (8am-12pm) - Slot 2' },
+      { time: '12:00', label: 'Afternoon (12pm-5pm) - Slot 1' },
+      { time: '14:30', label: 'Afternoon (12pm-5pm) - Slot 2' }
+    ],
     workingDays: [1, 2, 3, 4, 5, 6, 7],
     unavailableDates: []
   });
@@ -111,6 +125,8 @@ export default function Settings({ fetcher }: Props) {
           openingTime: typeof v.openingTime === 'string' ? v.openingTime : '08:00',
           closingTime: typeof v.closingTime === 'string' ? v.closingTime : '18:00',
           slotDuration: typeof v.slotDuration === 'number' ? v.slotDuration : 60,
+          useFixedSlots: typeof v.useFixedSlots === 'boolean' ? v.useFixedSlots : true,
+          fixedSlots: Array.isArray(v.fixedSlots) ? v.fixedSlots : [],
           workingDays: asNumberArray(v.workingDays, [1, 2, 3, 4, 5, 6, 7]),
           unavailableDates: asStringArray(v.unavailableDates)
         });
@@ -277,15 +293,61 @@ export default function Settings({ fetcher }: Props) {
             </div>
           </div>
 
-          <div className="form-group">
-            <label><div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Hourglass size={14} /> Slot Duration</div></label>
-            <select value={settings.slotDuration} onChange={e => setSettings({ ...settings, slotDuration: parseInt(e.target.value) })}>
-              <option value="30">30 Minutes (Fast Service)</option>
-              <option value="60">1 Hour (Standard Service)</option>
-              <option value="90">1.5 Hours (Deep Service)</option>
-              <option value="120">2 Hours (Extended Service)</option>
-            </select>
+          <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+              <input
+                type="checkbox"
+                checked={settings.useFixedSlots}
+                onChange={e => setSettings({ ...settings, useFixedSlots: e.target.checked })}
+                style={{ width: 'auto', marginRight: '8px' }}
+              />
+              Use 4 Fixed AM/PM Slots
+            </label>
           </div>
+
+          {settings.useFixedSlots ? (
+            <div style={{ marginBottom: '1.5rem', background: 'rgba(255,255,255,0.03)', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.06)' }}>
+              <h4 style={{ margin: '0 0 1rem 0', display: 'flex', alignItems: 'center', gap: '8px' }}><Clock size={16} /> Configure Slots</h4>
+              {settings.fixedSlots.map((slot, index) => (
+                <div key={index} style={{ display: 'flex', gap: '1rem', marginBottom: '0.8rem', alignItems: 'center' }}>
+                  <input
+                    type="time"
+                    value={slot.time}
+                    onChange={e => {
+                      const next = [...settings.fixedSlots];
+                      next[index] = { ...next[index], time: e.target.value };
+                      setSettings({ ...settings, fixedSlots: next });
+                    }}
+                    style={{ flex: '0 0 120px' }}
+                  />
+                  <input
+                    type="text"
+                    value={slot.label}
+                    onChange={e => {
+                      const next = [...settings.fixedSlots];
+                      next[index] = { ...next[index], label: e.target.value };
+                      setSettings({ ...settings, fixedSlots: next });
+                    }}
+                    placeholder="Slot Label"
+                    style={{ flex: 1 }}
+                  />
+                </div>
+              ))}
+              <div style={{ color: 'var(--text-gray)', fontSize: '0.85rem' }}>
+                These are the exactly 4 options customers will see on the booking calendar.
+              </div>
+            </div>
+          ) : (
+            <div className="form-group">
+              <label><div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Hourglass size={14} /> Slot Duration</div></label>
+              <select value={settings.slotDuration} onChange={e => setSettings({ ...settings, slotDuration: parseInt(e.target.value) })}>
+                <option value="30">30 Minutes (Fast Service)</option>
+                <option value="60">1 Hour (Standard Service)</option>
+                <option value="90">1.5 Hours (Deep Service)</option>
+                <option value="120">2 Hours (Extended Service)</option>
+              </select>
+            </div>
+          )}
 
           <div className="form-group">
             <label><div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Calendar size={14} /> Working Days</div></label>
